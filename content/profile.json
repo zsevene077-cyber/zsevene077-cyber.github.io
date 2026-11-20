@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "updated": "2026-11-20",
+  "default_language": "zh",
+  "name": {
+    "zh": "张壮志",
+    "en": "Zhuangzhi Zhang"
+  },
+  "tagline": {
+    "zh": "机器人学习与 AI 系统",
+    "en": "Robot Learning & AI Systems"
+  },
+  "bio": [
+    {
+      "zh": "我是北京理工大学车辆工程硕士研究生，目前在原力灵机从事 AI Infra 实习。我的兴趣是机器人学习及其背后的数据、评测与计算系统。",
+      "en": "I am a master's student in Vehicle Engineering at Beijing Institute of Technology and an AI Infrastructure Intern at Dexmal. I am interested in robot learning and the data, evaluation, and computing systems that support it."
+    },
+    {
+      "zh": "近期，我参与 VLA 模型评测、训练与推理回归、机器人多模态数据采集，以及模型服务相关的工程工作。我希望通过具体实验理解系统瓶颈，让结果可检查、方法可复用。",
+      "en": "My recent work involves VLA evaluation, training and inference regression checks, multimodal robot data collection, and model-serving infrastructure. I use experiments to understand system bottlenecks and work toward results that can be checked and methods that can be reused."
+    },
+    {
+      "zh": "此前，我参与过轮式与四足机器人的视觉感知和端侧部署，也在本科阶段开展了采摘装备设计与轻量化视觉模型项目。",
+      "en": "Previously, I worked on visual perception and edge deployment for wheeled and quadruped robots. My undergraduate projects also covered harvesting equipment design and lightweight computer vision models."
+    }
+  ],
+  "contact": {
+    "email": "zhangzhuangzhi_zzz@163.com",
+    "github": "https://github.com/zsevene077-cyber"
+  },
+  "education": [
+    {
+      "institution": { "zh": "北京理工大学", "en": "Beijing Institute of Technology" },
+      "degree": { "zh": "车辆工程硕士", "en": "M.S. in Vehicle Engineering" },
+      "start": "2026-09",
+      "end": "2029-06",
+      "expected": true,
+      "note": { "zh": "推荐免试入学；预计 2029 年 6 月毕业。", "en": "Admitted through recommendation; expected graduation in June 2029." }
+    },
+    {
+      "institution": { "zh": "北京林业大学", "en": "Beijing Forestry University" },
+      "degree": { "zh": "机械设计制造及其自动化本科", "en": "B.Eng. in Mechanical Design, Manufacturing and Automation" },
+      "start": "2022-09",
+      "end": "2026-06",
+      "expected": false,
+      "note": { "zh": "工学院；专业排名 12/117。", "en": "Ranked 12 out of 117 in the major." }
+    }
+  ],
+  "experience": [
+    {
+      "organization": { "zh": "原力灵机", "en": "Dexmal" },
+      "role": { "zh": "AI Infra 实习生", "en": "AI Infrastructure Intern" },
+      "start": "2026-06",
+      "end": "present",
+      "description": [
+        {
+          "zh": "参与具身模型的多环境评测、训推回归和结果审计，执行实验配置、运行跟进与异常分析。",
+          "en": "Contribute to multi-environment evaluation, training and inference regression checks, and result audits for embodied models, including experiment setup, run monitoring, and failure analysis."
+        },
+        {
+          "zh": "参与机器人多模态数据采集、模型服务和评测工具开发，关注数据完整性、服务可靠性与资源使用效率。",
+          "en": "Contribute to multimodal robot data collection, model serving, and evaluation tools, with attention to data completeness, service reliability, and resource efficiency."
+        }
+      ]
+    },
+    {
+      "organization": { "zh": "仝人智能科技（北京）有限公司", "en": "Tongren Intelligent Technology (Beijing)" },
+      "role": { "zh": "机器人视觉算法实习生", "en": "Robotics Perception Intern" },
+      "start": "2025-11",
+      "end": "2026-04",
+      "description": [
+        {
+          "zh": "参与局部导航视觉感知开发，开展多任务检测、相机标定、语义与深度融合，以及轮式和四足平台的接口集成。",
+          "en": "Contributed to visual perception for local navigation, including multi-task detection, camera calibration, semantic-depth fusion, and integration with wheeled and quadruped platforms."
+        },
+        {
+          "zh": "参与 Jetson Orin 上的 TensorRT 部署与推理优化，并开展 OpenVLA 部署、容器环境配置和推理链路预研。",
+          "en": "Worked on TensorRT deployment and inference optimization on Jetson Orin, along with exploratory work on OpenVLA deployment, container environments, and inference pipelines."
+        }
+      ]
+    }
+  ],
+  "skills": [
+    { "zh": "Python / C++", "en": "Python / C++" },
+    { "zh": "ROS2 / Autoware", "en": "ROS2 / Autoware" },
+    { "zh": "TensorRT / Jetson Orin", "en": "TensorRT / Jetson Orin" },
+    { "zh": "Docker / Linux", "en": "Docker / Linux" },
+    { "zh": "VLA 模型评测", "en": "VLA Evaluation" },
+    { "zh": "训练与推理回归", "en": "Training & Inference Regression Checks" },
+    { "zh": "机器人多模态数据采集", "en": "Multimodal Robot Data Collection" },
+    { "zh": "相机标定与空间融合", "en": "Camera Calibration & Spatial Fusion" },
+    { "zh": "SolidWorks / 机构设计", "en": "SolidWorks / Mechanism Design" }
+  ],
+  "recognition": [
+    {
+      "type": "award",
+      "title": { "zh": "全国大学生数学建模竞赛北京市一等奖", "en": "First Prize, Beijing Division, China Undergraduate Mathematical Contest in Modeling" },
+      "date": "2024",
+      "featured": true
+    },
+    {
+      "type": "award",
+      "title": { "zh": "亚太杯数学建模竞赛三等奖", "en": "Third Prize, Asia and Pacific Mathematical Contest in Modeling" },
+      "date": "2024",
+      "featured": true
+    },
+    {
+      "type": "award",
+      "title": { "zh": "中国国际大学生创新大赛北京市三等奖", "en": "Third Prize, Beijing Division, China International College Students' Innovation Competition" },
+      "date": null,
+      "featured": true
+    },
+    {
+      "type": "award",
+      "title": { "zh": "北京林业大学工程设计与表达竞赛二等奖", "en": "Second Prize, Engineering Design and Communication Competition, Beijing Forestry University" },
+      "date": null,
+      "featured": false
+    },
+    {
+      "type": "award",
+      "title": { "zh": "北京林业大学优秀学生奖学金", "en": "Outstanding Student Scholarship, Beijing Forestry University" },
+      "date": "2022–2025",
+      "featured": false
+    },
+    {
+      "type": "patent",
+      "title": { "zh": "一种梳振式枸杞采摘装备", "en": "A Comb-Vibration Wolfberry Harvesting Device" },
+      "identifier": "202411648348.1",
+      "category": { "zh": "发明专利申请", "en": "Invention Patent Application" },
+      "status": { "zh": "实审（据简历）", "en": "Under substantive examination, as stated in the resume" },
+      "role": { "zh": "学生第一作者", "en": "First-listed student contributor" },
+      "date": null,
+      "featured": true
+    },
+    {
+      "type": "patent",
+      "title": { "zh": "梳振式枸杞采摘机", "en": "Comb-Vibration Wolfberry Harvester" },
+      "identifier": "202430738379.0",
+      "category": { "zh": "外观设计专利", "en": "Design Patent" },
+      "status": { "zh": "已授权（据简历）", "en": "Granted, as stated in the resume" },
+      "role": { "zh": "学生第一作者", "en": "First-listed student contributor" },
+      "date": null,
+      "featured": true
+    },
+    {
+      "type": "software-copyright",
+      "title": { "zh": "一种林用无人机智能管理平台软件 V1.0", "en": "Intelligent Management Platform for Forestry UAVs V1.0" },
+      "identifier": "2025SR0628510",
+      "category": { "zh": "软件著作权", "en": "Software Copyright Registration" },
+      "status": { "zh": "已登记（据简历）", "en": "Registered, as stated in the resume" },
+      "role": { "zh": "学生第一作者", "en": "First-listed student contributor" },
+      "date": "2025",
+      "featured": false
+    },
+    {
+      "type": "software-copyright",
+      "title": { "zh": "一种3D打印机运动学与动力学仿真分析软件 V1.0", "en": "Kinematic and Dynamic Simulation Software for 3D Printers V1.0" },
+      "identifier": "2025SR0929744",
+      "category": { "zh": "软件著作权", "en": "Software Copyright Registration" },
+      "status": { "zh": "已登记（据简历）", "en": "Registered, as stated in the resume" },
+      "role": { "zh": "学生第一作者", "en": "First-listed student contributor" },
+      "date": "2025",
+      "featured": false
+    },
+    {
+      "type": "software-copyright",
+      "title": { "zh": "一种可以实时监控的采摘机电机转速控制软件 V1.0", "en": "Harvesting Motor Speed Control Software with Real-Time Monitoring V1.0" },
+      "identifier": "2025SR0077937",
+      "category": { "zh": "软件著作权", "en": "Software Copyright Registration" },
+      "status": { "zh": "已登记（据简历）", "en": "Registered, as stated in the resume" },
+      "role": { "zh": "学生第一作者", "en": "First-listed student contributor" },
+      "date": "2025",
+      "featured": false
+    },
+    {
+      "type": "software-copyright",
+      "title": { "zh": "一种林火监测的无人机集群部署管理软件 V1.0", "en": "UAV Fleet Deployment Management Software for Forest Fire Monitoring V1.0" },
+      "identifier": "2025SR0775198",
+      "category": { "zh": "软件著作权", "en": "Software Copyright Registration" },
+      "status": { "zh": "已登记（据简历）", "en": "Registered, as stated in the resume" },
+      "role": { "zh": "学生第二作者", "en": "Second-listed student contributor" },
+      "date": "2025",
+      "featured": false
+    }
+  ]
+}

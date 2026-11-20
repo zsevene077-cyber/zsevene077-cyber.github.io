@@ -1,0 +1,118 @@
+[
+  {
+    "id": "vla-evaluation",
+    "title": {"zh": "VLA 评测：从跑通到可靠比较", "en": "VLA evaluation: making experiments comparable"},
+    "category": {"zh": "模型评测 · 性能分析", "en": "MODEL EVALUATION · PERFORMANCE"},
+    "period": "2026",
+    "tags": ["LIBERO", "RoboTwin2", "GPU", "Python"],
+    "summary": {"zh": "围绕具身模型的仿真评测，参与并发配置、推理微批处理和结果审计。把吞吐、资源占用与评测完整性放在一起检查。", "en": "I contribute to embodied-model evaluation through concurrency tuning, inference micro-batching, and result auditing, examining throughput, resource use, and evaluation completeness together."},
+    "highlight": {"zh": "一次 500-episode 对比：55.8 → 32.0 分钟", "en": "One 500-episode comparison: 55.8 → 32.0 min"},
+    "chart": "libero",
+    "question": {"zh": "怎样缩短模型评测的等待时间，同时保留清楚的实验条件和完整结果？", "en": "How can evaluation finish sooner while keeping its experimental conditions and results auditable?"},
+    "work": [
+      {"zh": "参与 LIBERO、RoboTwin2 等仿真环境的评测执行，跟进模型服务、工作进程和结果产出。", "en": "Run and monitor evaluations in simulation environments including LIBERO and RoboTwin2, following model services, workers, and result artifacts."},
+      {"zh": "对比评测并发与推理微批配置，记录耗时、显存、利用率和异常，不只观察服务是否启动。", "en": "Compare evaluator concurrency and inference micro-batching, recording elapsed time, memory, utilization, and failures rather than relying only on service readiness."},
+      {"zh": "检查 episode 唯一性、覆盖范围、重复与缺失，保留失败原因及补跑记录。", "en": "Audit episode identity and coverage, detect duplicates and omissions, and preserve failures and recovery records."}
+    ],
+    "experiment": {"zh": "2026 年 7 月的 DM0 / LIBERO Spatial 对比，10 个任务 × 50 episodes，共 500 episodes；seed 7，推理端使用单张 RTX 4090D。配置由 2 个评测 worker、无微批，调整到 10 个 worker、batch 4、等待 20 ms；55.8 与 32.0 分钟使用该次记录的 wall time 口径。", "en": "A July 2026 comparison of DM0 on LIBERO Spatial: 10 tasks × 50 episodes, seed 7, with one RTX 4090D for inference. The configuration changes from 2 evaluator workers without batching to 10 workers with batch 4 and a 20 ms wait. The 55.8- and 32.0-minute values use the wall-time measure in that experiment record."},
+    "results": [
+      {"label": {"zh": "评测耗时", "en": "Elapsed time"}, "value": "55.8 → 32.0 min"},
+      {"label": {"zh": "耗时减少", "en": "Time reduction"}, "value": "42.7%"},
+      {"label": {"zh": "服务 GPU 平均利用率", "en": "Mean serving GPU utilization"}, "value": "50.6% → 77.1%"}
+    ],
+    "boundary": {"zh": "这是指定模型、环境与配置下的单 seed 性能结果。它不代表模型成功率提升，也不能直接推广为所有任务的加速比。更高并发还需权衡显存和内存开销。", "en": "This is a single-seed performance result for a specific model, environment, and configuration. It is not a model success-rate improvement or a universal speedup. Higher concurrency also requires a memory trade-off."},
+    "reflection": {"zh": "我逐渐把“运行完成”理解成一组可核对的条件：进程结束、结果落盘、覆盖完整、错误解释清楚，再讨论性能。", "en": "I increasingly treat completion as a set of checks: the run has terminated, artifacts are saved, coverage is complete, and errors are accounted for. Performance comes after those checks."}
+  },
+  {
+    "id": "robot-data",
+    "title": {"zh": "NexArm：采集、转码与数据完整性", "en": "NexArm: capture, transcoding, and data integrity"},
+    "category": {"zh": "机器人数据 · 系统工程", "en": "ROBOT DATA · SYSTEMS"},
+    "period": "2026",
+    "tags": ["Multi-camera", "Video", "Python", "Windows"],
+    "summary": {"zh": "参与机械臂多相机采集链路和后台转码工具开发，关注持续写入、队列行为、时间戳及派生文件的一致性。", "en": "I contribute to multi-camera capture and background transcoding for robot data, focusing on sustained writes, queue behavior, timestamps, and consistency of derived files."},
+    "highlight": {"zh": "同两条录制：转码等待时间减少 35.0%", "en": "Same two recordings: 35.0% less transcoding time"},
+    "chart": "transcode",
+    "question": {"zh": "如何让采集后的处理更快，同时保证原始数据和输出的一致性？", "en": "How can post-capture processing be faster while preserving source data and consistent outputs?"},
+    "work": [
+      {"zh": "参与多相机录制、机械臂状态读取、后台任务队列和转码流程的开发与排查。", "en": "Work on multi-camera recording, robot-state reads, background queues, and transcoding development and diagnosis."},
+      {"zh": "以相同封存录制对比不同转码并发，检查输出 MP4 哈希、时间戳和原始数据哈希。", "en": "Compare transcoding concurrency on the same sealed recordings, checking MP4 hashes, timestamps, and source-data hashes."},
+      {"zh": "执行真实相机与静止机械臂状态读取测试，核对保存结果和解码帧数，并明确与运动跟随验收的区别。", "en": "Test real cameras alongside state reads from static arms, verify saved output and decoded frame counts, and distinguish this from motion-following acceptance."}
+    ],
+    "experiment": {"zh": "Windows 后台转码队列；同两条封存录制，共 3,090 帧，对比 4 路和 8 路并行。另一次真实静止设备读取测试完成 14 条录制，累计约 30 分钟。", "en": "A Windows background transcoding queue; 4 versus 8 parallel streams on the same two sealed recordings, totaling 3,090 frames. A separate real-device, static-arm read test produced 14 recordings over approximately 30 minutes."},
+    "results": [
+      {"label": {"zh": "转码耗时", "en": "Transcoding time"}, "value": "63.517 → 41.265 s"},
+      {"label": {"zh": "MP4 哈希与时间戳", "en": "MP4 hashes and timestamps"}, "value": {"zh": "两组一致", "en": "Identical between runs"}},
+      {"label": {"zh": "静止读取测试的解码帧数", "en": "Decoded frames in the static-arm test"}, "value": "176,557"}
+    ],
+    "boundary": {"zh": "转码结果来自同两条录制的离线对比。静止设备读取测试产生 148 个派生 MP4；它验证了该测试范围内的采集与处理链路，没有验证机械臂运动跟随、机械控制性能或训练所需的视频与状态对齐。", "en": "The transcoding result is an offline comparison using two recordings. The static-arm read test produced 148 derived MP4s and validated capture and processing within that scope. It did not establish motion following, mechanical control performance, or training-grade video/state alignment."},
+    "reflection": {"zh": "数据工程的优化需要同时回答两个问题：有没有更快，以及产出的数据是否仍然可信。", "en": "For data-system optimization, I want to answer both questions: is it faster, and can the resulting data still be trusted?"}
+  },
+  {
+    "id": "multimodal-protocols",
+    "title": {"zh": "多模态评测接入与协议诊断", "en": "Multimodal evaluation and protocol diagnostics"},
+    "category": {"zh": "评测工具 · 结果可信度", "en": "EVALUATION TOOLS · RELIABILITY"},
+    "period": "2026",
+    "tags": ["lmms-eval", "VLM", "Scoring", "Audit"],
+    "summary": {"zh": "参与多模态评测入口、任务配置和结果检查，区分“能出分”与“严格零异常”，让异常和协议差异留在记录里。", "en": "I work on multimodal evaluation entry points, task configuration, and result checks, distinguishing functional scoring from strict, anomaly-free validation."},
+    "highlight": {"zh": "32 个入口：31 个功能出分，27 个严格零异常", "en": "32 entries: 31 functionally scored, 27 passed strict checks"},
+    "chart": "protocol",
+    "question": {"zh": "评测脚本输出了分数，是否就意味着结果可以直接比较？", "en": "Does a score from an evaluation script automatically mean the result is comparable?"},
+    "work": [
+      {"zh": "参与任务适配、数据字段映射、推理调用和评分流程的连通性检查。", "en": "Help connect task adapters, dataset fields, inference calls, and scoring procedures."},
+      {"zh": "保留协议差异、异常样本和覆盖情况，区分功能完成、正式覆盖与严格验收。", "en": "Record protocol differences, anomalous samples, and coverage, separating functional completion from full coverage and strict acceptance."},
+      {"zh": "把可复用的任务配置、评分逻辑和审计说明与大型预测结果分开管理。", "en": "Keep reusable task configuration, scoring logic, and audit notes separate from large prediction artifacts."}
+    ],
+    "experiment": {"zh": "一次 32 个评测入口的功能验证，各任务的测试范围不同。统计保留了异常项，不将功能出分自动归入严格通过。", "en": "A functional validation across 32 evaluation entries, with different tested scopes per benchmark. Anomalous entries remain visible rather than being counted as strict passes merely because a score was produced."},
+    "results": [
+      {"label": {"zh": "验证入口", "en": "Entries examined"}, "value": "32"},
+      {"label": {"zh": "功能出分", "en": "Functional scoring completed"}, "value": "31"},
+      {"label": {"zh": "严格零异常", "en": "Passed strict checks"}, "value": "27"}
+    ],
+    "boundary": {"zh": "31 个功能出分入口中，4 个仍保留异常；另有 1 个入口待完成。任务覆盖范围并不一致，不能把这组数字写成 31 项完整、正式或可直接比较的榜单成绩。", "en": "Four of the 31 functionally completed entries retain anomalies; one additional entry remains pending. Coverage differs by task, so these are not 31 complete, formal, directly comparable benchmark results."},
+    "reflection": {"zh": "比分数本身更早需要确定的，是模型身份、样本范围、评分协议和异常处理。", "en": "Before interpreting a score, I want to know the model identity, sample scope, scoring protocol, and treatment of errors."}
+  },
+  {
+    "id": "evaluation-infra",
+    "title": {"zh": "DexEval 与云端模型服务工程", "en": "DexEval and cloud model-serving infrastructure"},
+    "category": {"zh": "AI INFRA · 工程工具", "en": "AI INFRA · ENGINEERING TOOLS"},
+    "period": "2026",
+    "tags": ["Model Serving", "Docker", "Lifecycle", "Python"],
+    "summary": {"zh": "参与模型评测平台及云端服务相关开发，把配置、提交、监控、结果审计和资源回收串成可跟进的实验流程。", "en": "I contribute to evaluation-platform and cloud-serving work, connecting configuration, submission, monitoring, result auditing, and resource cleanup into a traceable experiment workflow."},
+    "highlight": {"zh": "关注一次实验的完整生命周期", "en": "Following the full experiment lifecycle"},
+    "chart": "lifecycle",
+    "question": {"zh": "如何让一次评测的配置、执行状态、产物和资源归属对应起来？", "en": "How can an evaluation's configuration, execution state, artifacts, and resource ownership stay connected?"},
+    "work": [
+      {"zh": "参与评测工具与平台功能开发、配置核对和本地检查，结合已有工作流跟进云端执行。", "en": "Contribute to evaluation tools and platform features, check configuration locally, and follow cloud execution through established workflows."},
+      {"zh": "按部署状态、健康检查、模型身份和真实推理请求逐层检查服务。", "en": "Check services through deployment state, health, model identity, and actual inference requests."},
+      {"zh": "跟进运行日志和结果目录，核对 episode 覆盖、终态及归档，再处理当前实验的资源回收。", "en": "Follow logs and result directories, verify episode coverage, terminal state, and archival, and then clean up resources belonging to the current experiment."}
+    ],
+    "experiment": {"zh": "工程实践覆盖本地功能检查、云端作业与推理服务跟进，以及实验结果整理；不同环节按各自验证范围记录。", "en": "The engineering work spans local checks, cloud jobs and inference-service monitoring, and result organization, with each stage documented at its own verification scope."},
+    "results": [],
+    "boundary": {"zh": "这里展示的是实习期间参与的工程工作与流程认识，不宣称独立负责整个评测平台，也不把本地测试通过等同于生产部署或物理机器人验收。", "en": "This describes contributions and engineering practices during an internship, not independent ownership of an entire platform. Passing local tests is distinct from deployment or physical-robot acceptance."},
+    "reflection": {"zh": "一个可用的评测工具，应该帮助人回答：现在运行到哪里、结果保存在哪里、还有哪些资源需要处理。", "en": "A useful evaluation tool should make three things clear: where the run stands, where its results are saved, and which resources still need attention."}
+  },
+  {
+    "id": "training-regression",
+    "title": {"zh": "DM05 训练后回归与覆盖审计", "en": "DM05 post-training regression and coverage audits"},
+    "category": {"zh": "训练与推理 · 回归验证", "en": "TRAINING & INFERENCE · REGRESSION"},
+    "period": "2026",
+    "tags": ["DM05", "LoRA", "LIBERO", "Regression"],
+    "summary": {"zh": "围绕训练 checkpoint 执行评测与严格覆盖检查，把模型结果、系统异常和历史对比的适用条件分别记录。", "en": "I run checkpoint evaluations with strict coverage checks, keeping policy outcomes, system errors, and the limits of historical comparisons distinct."},
+    "highlight": {"zh": "四套 LIBERO：2,000 个唯一 episode 完整覆盖", "en": "Four LIBERO suites: 2,000 unique episodes covered"},
+    "chart": "coverage",
+    "question": {"zh": "一个训练后的 checkpoint 是否被完整评测？其结果支持什么结论？", "en": "Has a trained checkpoint been evaluated completely, and what conclusions does the result support?"},
+    "work": [
+      {"zh": "参与训练后模型的推理检查、四套 LIBERO 评测及运行异常跟进。", "en": "Contribute to post-training inference checks, four-suite LIBERO evaluation, and investigation of run-time issues."},
+      {"zh": "核对计划样本与实际唯一 episode，检查重复、缺失、越界和系统错误。", "en": "Compare planned samples with observed unique episodes, checking duplicates, omissions, out-of-range entries, and system errors."},
+      {"zh": "整理 checkpoint、协议和评分结果的对应关系，避免将非受控历史对比描述成训练收益。", "en": "Keep checkpoint identity, protocol, and scores connected, avoiding improvement claims from uncontrolled historical comparisons."}
+    ],
+    "experiment": {"zh": "DM05 LoRA checkpoint 30k；LIBERO Spatial、Object、Goal、LIBERO-10 四套，每套 500 episodes。最终严格审计覆盖 2,000 个唯一 episode。", "en": "DM05 LoRA checkpoint 30k; LIBERO Spatial, Object, Goal, and LIBERO-10 with 500 episodes each. The final strict audit covers 2,000 unique episodes."},
+    "results": [
+      {"label": {"zh": "唯一 episode", "en": "Unique episodes"}, "value": "2,000 / 2,000"},
+      {"label": {"zh": "成功次数", "en": "Successful episodes"}, "value": "1,933 / 2,000"},
+      {"label": {"zh": "该次运行成功率", "en": "Observed success rate"}, "value": "96.65%"}
+    ],
+    "boundary": {"zh": "结果属于这个 checkpoint 和评测协议。历史基座结果并非同条件受控 A/B，因此不能据此声称 LoRA 训练带来了提分，也不将该值视为个人算法创新成果。", "en": "The result belongs to this checkpoint and protocol. The historical base-model result is not a matched, controlled A/B comparison, so it does not establish a gain from LoRA training or a personal algorithmic contribution."},
+    "reflection": {"zh": "训练、推理和评测需要一条连续的证据链；完整覆盖首先回答“测全了没有”，模型效果还需要另外的对照。", "en": "Training, inference, and evaluation need a continuous evidence trail. Full coverage first answers whether the evaluation is complete; model-quality conclusions require an additional controlled comparison."}
+  }
+]
