@@ -3,10 +3,12 @@
 import html
 import json
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent
 PROFILE = json.loads((ROOT / "content/profile.json").read_text())
 PROJECTS = json.loads((ROOT / "content/projects.json").read_text())
+MEDIA = json.loads((ROOT / "content/media.json").read_text())
 SITE = "https://zsevene077-cyber.github.io"
 CATALOG = "https://github.com/zsevene077-cyber/embodied-ai-portfolio"
 
@@ -38,6 +40,83 @@ def home(lang):
 
 def cv(lang):
     return "cv-en.html" if lang == "en" else "cv.html"
+
+
+def media_path(value):
+    """Accept only existing, repository-local media, never external embeds."""
+    if not isinstance(value, str):
+        raise ValueError("Media src/poster must be a path string")
+    parsed = urlsplit(value)
+    path = Path(value)
+    if parsed.scheme or parsed.netloc or parsed.query or parsed.fragment or "\\" in value or path.is_absolute() or ".." in path.parts:
+        raise ValueError(f"Media must use a local assets/media path: {value!r}")
+    if path.parts[:2] != ("assets", "media"):
+        raise ValueError(f"Media must be inside assets/media: {value!r}")
+    actual = (ROOT / path).resolve()
+    if not actual.is_relative_to(ROOT.resolve()) or not actual.is_relative_to((ROOT / "assets/media").resolve()) or not actual.is_file():
+        raise ValueError(f"Media file is missing or outside assets/media: {value!r}")
+    return path.as_posix()
+
+
+def check_media():
+    if MEDIA.get("schema_version") != 1 or not isinstance(MEDIA.get("projects"), dict):
+        raise ValueError("content/media.json needs schema_version 1 and a projects object")
+    project_ids = {project["id"] for project in PROJECTS}
+    for project_id, config in MEDIA["projects"].items():
+        if project_id not in project_ids:
+            raise ValueError(f"Unknown project id in media.json: {project_id}")
+        if not isinstance(config, dict) or not isinstance(config.get("gallery", []), list):
+            raise ValueError(f"Invalid media configuration for {project_id}")
+        entries = ([config["thumbnail"]] if config.get("thumbnail") is not None else []) + config.get("gallery", [])
+        for item in entries:
+            if not isinstance(item, dict) or item.get("type") not in ("image", "video"):
+                raise ValueError(f"Media in {project_id} must have type image or video")
+            src = media_path(item.get("src"))
+            extensions = {"image": {".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif"}, "video": {".mp4", ".webm"}}
+            if Path(src).suffix.lower() not in extensions[item["type"]]:
+                raise ValueError(f"Unsupported {item['type']} format: {src}")
+            for field in ("alt", "caption"):
+                if not isinstance(item.get(field), dict) or any(not isinstance(item[field].get(lang), str) for lang in ("zh", "en")):
+                    raise ValueError(f"Media {field} needs zh and en text: {src}")
+            if any(not item["alt"][lang].strip() for lang in ("zh", "en")):
+                raise ValueError(f"Media alt text must not be empty: {src}")
+            if item.get("poster"):
+                poster = media_path(item["poster"])
+                if item["type"] != "video" or Path(poster).suffix.lower() not in extensions["image"]:
+                    raise ValueError(f"Only video may specify an image poster: {src}")
+
+
+def media_element(item, lang, prefix=""):
+    src = esc(prefix + item["src"])
+    description = esc(tr(item["alt"], lang))
+    if item["type"] == "image":
+        return f'<img src="{src}" alt="{description}" loading="lazy" decoding="async">'
+    poster = f' poster="{esc(prefix + item["poster"])}"' if item.get("poster") else ""
+    return f'<video controls preload="metadata" playsinline aria-label="{description}"{poster}><source src="{src}" type="video/{"webm" if item["src"].lower().endswith(".webm") else "mp4"}"><p>{tx("浏览器不支持内嵌视频。","Your browser does not support embedded video.",lang)} <a href="{src}">{tx("打开视频文件","Open the video file",lang)}</a></p></video>'
+
+
+def project_art(p, lang):
+    item = MEDIA["projects"].get(p["id"], {}).get("thumbnail")
+    if item is None:
+        return f'<a class="project-art" href="{page_path(p,lang)}" aria-label="{esc(tr(p["title"],lang))}">{chart(p["chart"],lang)}</a>'
+    visual = media_element(item, lang)
+    caption = tr(item["caption"], lang)
+    caption_html = f'<figcaption>{esc(caption)}</figcaption>' if caption.strip() else ""
+    if item["type"] == "image":
+        visual = f'<a href="{page_path(p,lang)}">{visual}</a>'
+    return f'<figure class="project-art project-media">{visual}{caption_html}</figure>'
+
+
+def project_gallery(p, lang):
+    items = MEDIA["projects"].get(p["id"], {}).get("gallery", [])
+    if not items:
+        return ""
+    figures = []
+    for item in items:
+        caption = tr(item["caption"], lang)
+        caption_html = f'<figcaption>{esc(caption)}</figcaption>' if caption.strip() else ""
+        figures.append(f'<figure class="media-figure">{media_element(item,lang,"../")}{caption_html}</figure>')
+    return f'<section class="detail-section project-gallery"><h2>{tx("项目影像","Project media",lang)}</h2><div class="media-grid">{"".join(figures)}</div></section>'
 
 
 def shell(title, description, body, lang, filename, *, detail=False, alternate=None):
@@ -112,14 +191,14 @@ def homepage(lang):
     rows=[]
     for p in PROJECTS:
         tags = ''.join(f'<span class="tag">{esc(t)}</span>' for t in p['tags'][:3])
-        rows.append(f'<article class="project-row"><a class="project-art" href="{page_path(p,lang)}" aria-label="{esc(tr(p["title"],lang))}">{chart(p["chart"],lang)}</a><div class="project-copy"><div class="eyebrow">{esc(tr(p["category"],lang))}</div><h3><a href="{page_path(p,lang)}">{esc(tr(p["title"],lang))}</a></h3><p>{esc(tr(p["summary"],lang))}</p><p class="project-highlight">{esc(tr(p["highlight"],lang))}</p><div class="project-meta">{tags}<a class="detail" href="{page_path(p,lang)}">{tx("项目详情","Read the project",lang)}</a></div></div></article>')
+        rows.append(f'<article class="project-row">{project_art(p,lang)}<div class="project-copy"><div class="eyebrow">{esc(tr(p["category"],lang))}</div><h3><a href="{page_path(p,lang)}">{esc(tr(p["title"],lang))}</a></h3><p>{esc(tr(p["summary"],lang))}</p><p class="project-highlight">{esc(tr(p["highlight"],lang))}</p><div class="project-meta">{tags}<a class="detail" href="{page_path(p,lang)}">{tx("项目详情","Read the project",lang)}</a></div></div></article>')
     patents=[]
     for p in PROFILE['recognition']:
         if p['type']=='patent':
             patents.append(f'<article class="output-item"><h3>{esc(tr(p["title"],lang))}</h3><p>{esc(tr(p["category"],lang))} · {esc(tr(p["status"],lang))}<br>{esc(p["identifier"])} · {esc(tr(p["role"],lang))}</p></article>')
     awards=''.join(f'<li><small>{esc(a["date"] or "—")}</small><span>{esc(tr(a["title"],lang))}</span></li>' for a in PROFILE['recognition'] if a['type']=='award' and a['featured'])
     skills=''.join(f'<span>{esc(tr(s,lang))}</span>' for s in PROFILE['skills'])
-    return f'''<main id="main" class="wrap">
+    return f'''<main id="main" class="wrap home-main">
 <section id="about" class="hero" aria-labelledby="name"><div class="hero-text"><div class="eyebrow">ROBOT LEARNING & AI SYSTEMS</div><h1 id="name">{esc(tr(PROFILE['name'],lang))}<span class="name-en">{tx('Zhuangzhi Zhang','张壮志',lang)}</span></h1><p class="hero-role">{tx('北京理工大学硕士研究生 · 原力灵机 AI Infra 实习生','M.S. student at BIT · AI Infrastructure Intern at Dexmal',lang)}</p><div class="bio">{bio}</div><div class="contact-links"><a href="mailto:{PROFILE['contact']['email']}">{tx('邮箱','Email',lang)}</a><a href="{PROFILE['contact']['github']}">GitHub</a><a href="{cv(lang)}">{tx('简历','CV',lang)}</a></div></div><figure class="portrait"><img src="assets/portrait.png" alt="{tx('张壮志的个人照片','Portrait of Zhuangzhi Zhang',lang)}" width="319" height="382"><figcaption>{tx('北京，中国','Beijing, China',lang)}<br>{tx('机器人学习与 AI 系统','Robot learning & AI systems',lang)}</figcaption></figure></section>
 <div class="focus-line"><strong>{tx('当前关注','Current interests',lang)}</strong><span>{tx('VLA 评测　/　模型部署　/　机器人数据','VLA evaluation　/　Model serving　/　Robot data',lang)}</span></div>
 <section id="projects" class="section"><div class="section-heading"><div><h2>{tx('精选项目','Selected projects',lang)}</h2><p>{tx('从实验配置到数据与结果，记录我参与的工程实践。','Engineering work connecting experiment setup, data, and results.',lang)}</p></div><a href="{CATALOG}">{tx('GitHub 项目目录','Project catalog on GitHub',lang)}</a></div>{''.join(rows)}</section>
@@ -136,7 +215,7 @@ def projectpage(p, lang):
         metrics=''.join(f'<div><div class="result-value">{esc(tr(r["value"],lang))}</div><div class="result-label">{esc(tr(r["label"],lang))}</div></div>' for r in p['results'])
         results=f'<section class="detail-section"><h2>{tx("观察到的结果","Observed results",lang)}</h2><div class="results">{metrics}</div></section>'
     work=''.join(f'<li>{esc(tr(item,lang))}</li>' for item in p['work'])
-    return f'''<main id="main" class="wrap"><div class="detail-main"><div class="breadcrumb"><a href="../{home(lang)}#projects">{tx('精选项目','Selected projects',lang)}</a> / {esc(tr(p['category'],lang))}</div><header class="project-header"><div class="eyebrow">{p['period']} · {tx('原力灵机实习','Internship at Dexmal',lang)}</div><h1>{esc(tr(p['title'],lang))}</h1><p class="project-lead">{esc(tr(p['summary'],lang))}</p><div class="detail-meta">{' · '.join(esc(t) for t in p['tags'])}</div></header><figure class="detail-figure">{chart(p['chart'],lang)}<figcaption>{esc(tr(p['highlight'],lang))}</figcaption></figure><section class="detail-section"><h2>{tx('要解决的问题','The question',lang)}</h2><p>{esc(tr(p['question'],lang))}</p></section><section class="detail-section"><h2>{tx('我参与的工作','My contribution',lang)}</h2><ul>{work}</ul></section><section class="detail-section"><h2>{tx('条件与范围','Conditions and scope',lang)}</h2><p>{esc(tr(p['experiment'],lang))}</p></section>{results}<aside class="boundary"><h2>{tx('结果的适用范围','How to interpret the result',lang)}</h2><p>{esc(tr(p['boundary'],lang))}</p></aside><section class="detail-section"><h2>{tx('这项工作的启发','What I learned',lang)}</h2><p>{esc(tr(p['reflection'],lang))}</p></section><div class="project-nav"><a href="{CATALOG}">{tx('查看 GitHub 项目说明','Project notes on GitHub',lang)}</a><a href="../{home(lang)}#projects">{tx('返回全部项目','Back to all projects',lang)}</a></div></div></main>'''
+    return f'''<main id="main" class="wrap"><div class="detail-main"><div class="breadcrumb"><a href="../{home(lang)}#projects">{tx('精选项目','Selected projects',lang)}</a> / {esc(tr(p['category'],lang))}</div><header class="project-header"><div class="eyebrow">{p['period']} · {tx('原力灵机实习','Internship at Dexmal',lang)}</div><h1>{esc(tr(p['title'],lang))}</h1><p class="project-lead">{esc(tr(p['summary'],lang))}</p><div class="detail-meta">{' · '.join(esc(t) for t in p['tags'])}</div></header><figure class="detail-figure">{chart(p['chart'],lang)}<figcaption>{esc(tr(p['highlight'],lang))}</figcaption></figure>{project_gallery(p,lang)}<section class="detail-section"><h2>{tx('要解决的问题','The question',lang)}</h2><p>{esc(tr(p['question'],lang))}</p></section><section class="detail-section"><h2>{tx('我参与的工作','My contribution',lang)}</h2><ul>{work}</ul></section><section class="detail-section"><h2>{tx('条件与范围','Conditions and scope',lang)}</h2><p>{esc(tr(p['experiment'],lang))}</p></section>{results}<aside class="boundary"><h2>{tx('结果的适用范围','How to interpret the result',lang)}</h2><p>{esc(tr(p['boundary'],lang))}</p></aside><section class="detail-section"><h2>{tx('这项工作的启发','What I learned',lang)}</h2><p>{esc(tr(p['reflection'],lang))}</p></section><div class="project-nav"><a href="{CATALOG}">{tx('查看 GitHub 项目说明','Project notes on GitHub',lang)}</a><a href="../{home(lang)}#projects">{tx('返回全部项目','Back to all projects',lang)}</a></div></div></main>'''
 
 
 def cvpage(lang):
@@ -151,6 +230,7 @@ def write(path, content):
     destination.write_text(content + "\n", encoding="utf-8")
 
 
+check_media()
 for language in ('zh','en'):
     site_title = tx('张壮志 · 机器人学习与 AI 系统','Zhuangzhi Zhang · Robot Learning & AI Systems',language)
     description = tr(PROFILE['bio'][0],language)
@@ -161,4 +241,4 @@ for language in ('zh','en'):
         alternate = page_path(project,'en' if language=='zh' else 'zh').split('/')[-1]
         write(filename,shell(tr(project['title'],language)+' · '+tr(PROFILE['name'],language),tr(project['summary'],language),projectpage(project,language),language,filename,detail=True,alternate=alternate))
 write('404.html',shell('页面未找到 · 张壮志','页面未找到。','<main id="main" class="wrap not-found"><h1>页面未找到</h1><p>这个链接可能已更新。可以从首页继续浏览项目与经历。</p><a href="/">返回首页</a></main>','zh','404.html'))
-print('Generated 15 static HTML pages from content/profile.json and content/projects.json.')
+print('Generated 15 static HTML pages from profile, projects, and optional media JSON.')

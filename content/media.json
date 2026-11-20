@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "projects": {
+    "vla-evaluation": { "thumbnail": null, "gallery": [] },
+    "robot-data": { "thumbnail": null, "gallery": [] },
+    "multimodal-protocols": { "thumbnail": null, "gallery": [] },
+    "evaluation-infra": { "thumbnail": null, "gallery": [] },
+    "training-regression": { "thumbnail": null, "gallery": [] }
+  }
+}
