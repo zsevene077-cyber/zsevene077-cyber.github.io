@@ -31,19 +31,25 @@
   "education": [
     {
       "institution": { "zh": "北京理工大学", "en": "Beijing Institute of Technology" },
+      "website": { "zh": "https://www.bit.edu.cn/", "en": "https://english.bit.edu.cn/" },
+      "logo": "assets/bit-wordmark.webp",
+      "location": { "zh": "北京", "en": "Beijing" },
       "degree": { "zh": "车辆工程硕士", "en": "M.S. in Vehicle Engineering" },
       "start": "2026-09",
       "end": "2029-06",
       "expected": true,
-      "note": { "zh": "推荐免试入学；预计 2029 年 6 月毕业。", "en": "Admitted through recommendation; expected graduation in June 2029." }
+      "note": { "zh": "推荐免试入学", "en": "Admitted by recommendation" }
     },
     {
       "institution": { "zh": "北京林业大学", "en": "Beijing Forestry University" },
+      "website": { "zh": "https://www.bjfu.edu.cn/", "en": "https://english.bjfu.edu.cn/" },
+      "logo": "assets/bjfu-wordmark.webp",
+      "location": { "zh": "北京", "en": "Beijing" },
       "degree": { "zh": "机械设计制造及其自动化本科", "en": "B.Eng. in Mechanical Design, Manufacturing and Automation" },
       "start": "2022-09",
       "end": "2026-06",
       "expected": false,
-      "note": { "zh": "工学院；专业排名 12/117。", "en": "Ranked 12 out of 117 in the major." }
+      "note": { "zh": "工学院 · 专业排名 12/117", "en": "Ranked 12/117 in the major" }
     }
   ],
   "experience": [

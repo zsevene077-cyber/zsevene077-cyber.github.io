@@ -125,8 +125,8 @@ def shell(title, description, body, lang, filename, *, detail=False, alternate=N
     h = prefix + home(lang)
     nav = [
         ("about", "关于", "About"), ("news", "近况", "News"),
-        ("projects", "项目", "Projects"), ("education", "教育", "Education"),
-        ("experience", "经历", "Experience"), ("opensource", "开源", "Open source"),
+        ("education", "教育", "Education"), ("experience", "经历", "Experience"),
+        ("projects", "项目", "Projects"), ("opensource", "开源", "Open source"),
         ("recognition", "成果", "Awards"), ("contact", "联系", "Contact"),
     ]
     nav_html = "".join(f'<a href="{h}#{key}">{tx(zh,en,lang)}</a>' for key, zh, en in nav)
@@ -189,13 +189,28 @@ def timeline(items, lang):
 
 
 def education(lang):
-    return ''.join(f'<article class="education-item"><h3>{esc(tr(e["institution"],lang))}</h3><p>{esc(tr(e["degree"],lang))}</p><div class="date">{period(e,lang)}{tx("（预计）"," (expected)",lang) if e["expected"] else ""}</div><p>{esc(tr(e["note"],lang))}</p></article>' for e in PROFILE['education'])
+    rows = []
+    for school in PROFILE["education"]:
+        name = esc(tr(school["institution"], lang))
+        url = esc(tr(school["website"], lang))
+        dates = period(school, lang)
+        if school["expected"]:
+            dates += tx("（预计）", " (expected)", lang)
+        rows.append(f'''<li class="school-row">
+<a class="school-logo" href="{url}" aria-label="{name}" tabindex="-1"><img src="{esc(school['logo'])}" alt="" decoding="async"></a>
+<div class="school-study"><h3><a href="{url}">{name}</a></h3>
+<p>{esc(tr(school["degree"],lang))}</p><p>{esc(tr(school["note"],lang))}</p></div>
+<div class="school-meta"><span>{esc(dates)}</span><span>{esc(tr(school["location"],lang))}</span></div></li>''')
+    return '<ul class="school-list">' + ''.join(rows) + '</ul>'
+
 
 
 def homepage(lang):
+    university = PROFILE["education"][0]
+    employer = PROFILE["experience"][0]
     intro = tx(
-        "我在北京理工大学读车辆工程硕士，在原力灵机做机器人模型评测、推理优化和真机数据采集。我关心怎样更快、更可靠地找出策略在哪些场景下会失败，以及这些失败能怎样指导下一轮训练。",
-        "I study vehicle engineering at Beijing Institute of Technology. At Dexmal, I evaluate robot policies, optimize inference and work on real-robot data collection. I am interested in finding where policies fail and using those failures to guide the next round of training.",
+        "我做机器人学习与 AI 系统，主要研究视觉–语言–动作模型（VLA）的评测、推理优化和真机数据采集。我想弄清楚策略会在哪些场景下失败，以及怎样用这些失败指导下一轮训练。",
+        "I work on robot learning and AI systems, focusing on vision–language–action (VLA) policy evaluation, inference optimization and real-robot data collection. I study where policies fail and how those failures can guide the next round of training.",
         lang,
     )
     featured_ids = ("vla-evaluation", "training-regression", "robot-data")
@@ -229,22 +244,23 @@ def homepage(lang):
     return f'''<main id="main" class="academic-home">
 <section id="about" class="academic-hero" aria-labelledby="name">
 <div class="hero-landscape" role="img" aria-label="{tx('雪山下的双臂机器人工作台，窗边有小猫，窗外有人骑摩托、登山。','A two-arm robot at a mountain workbench, with a sleeping cat, a motorcyclist and a climber.',lang)}"></div>
-<div class="wrap hero-inner"><div class="hero-identity">
-<img class="hero-portrait" src="assets/portrait.png" width="319" height="382" alt="{esc(tr(PROFILE['name'],lang))}">
-<h1 id="name">{esc(tr(PROFILE['name'],lang))}<span>{tx('Zhuangzhi Zhang','张壮志',lang)}</span></h1></div>
-<p class="hero-field">{esc(tr(PROFILE['tagline'],lang))}</p>
+<div class="wrap hero-inner"><div class="hero-bio">
+<h1 id="name">{esc(tr(PROFILE['name'],lang))} <span lang="{tx('en','zh-CN',lang)}">{tx('Zhuangzhi Zhang','张壮志',lang)}</span></h1>
+<div class="hero-roles"><div><span>{tx('车辆工程硕士生','M.S. student · Vehicle Engineering',lang)}</span><a href="{esc(tr(university['website'],lang))}">{esc(tr(university['institution'],lang))}</a></div>
+<div><span>{esc(tr(employer['role'],lang))}</span><a href="#experience">{esc(tr(employer['organization'],lang))}</a></div></div>
 <p class="intro-copy">{esc(intro)}</p>
-<div class="hero-actions"><a href="{cv(lang)}">{tx('简历','CV',lang)}</a><a href="{PROFILE['contact']['github']}">GitHub</a><a href="mailto:{PROFILE['contact']['email']}">{tx('邮箱','Email',lang)}</a></div></div></section>
+<div class="hero-actions"><a href="{cv(lang)}">{tx('简历','CV',lang)}</a><a href="{PROFILE['contact']['github']}">GitHub</a><a href="mailto:{PROFILE['contact']['email']}">{tx('邮箱','Email',lang)}</a></div></div>
+<img class="hero-portrait" src="assets/portrait.png" width="319" height="382" alt="{esc(tr(PROFILE['name'],lang))}"></div></section>
 <section id="news" class="profile-block tinted"><div class="wrap">
 <h2>{tx('近况','News',lang)}</h2><div class="dated-row"><time datetime="2026-11">2026.11</time><p>{tx('整理并公开机器人评测、训推回归与数据采集项目记录。','Published project notes on robot evaluation, training regression checks and data collection.',lang)} <a href="{CATALOG}">{tx('项目目录','Project index',lang)}</a></p></div>
 </div></section>
+<section id="education" class="profile-block"><div class="wrap">
+<h2>{tx('教育背景','Education',lang)}</h2>{education(lang)}</div></section>
+<section id="experience" class="profile-block tinted"><div class="wrap">
+<h2>{tx('研究与实习经历','Research & experience',lang)}</h2>{timeline([research, *PROFILE['experience']],lang)}</div></section>
 <section id="projects" class="profile-block"><div class="wrap">
 <h2>{tx('代表项目','Selected projects',lang)}</h2>{''.join(rows)}
 <p class="related-projects">{tx('其他项目','More projects',lang)} · {other_projects}</p></div></section>
-<section id="education" class="profile-block tinted"><div class="wrap">
-<h2>{tx('教育背景','Education',lang)}</h2><div class="academic-education">{education(lang)}</div></div></section>
-<section id="experience" class="profile-block"><div class="wrap">
-<h2>{tx('研究与实习经历','Research & experience',lang)}</h2>{timeline([research, *PROFILE['experience']],lang)}</div></section>
 <section id="opensource" class="profile-block tinted"><div class="wrap">
 <h2>{tx('公开项目与技术笔记','Public projects & technical notes',lang)}</h2>
 <article class="resource-row"><div><h3><a href="{CATALOG}">Embodied AI Portfolio</a></h3><p>{tx('机器人学习项目目录，收录实验条件、性能对照和评测记录。','An index of robot learning projects, experiment settings, performance comparisons and evaluation records.',lang)}</p></div>
