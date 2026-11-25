@@ -123,8 +123,13 @@ def shell(title, description, body, lang, filename, *, detail=False, alternate=N
     prefix = "/" if filename == "404.html" else "../" if detail else ""
     alternate = alternate or ("en.html" if lang == "zh" else "index.html")
     h = prefix + home(lang)
-    nav = [("about", "关于", "About", "optional"), ("projects", "项目", "Projects", ""), ("experience", "经历", "Experience", "optional"), ("contact", "联系", "Contact", "")]
-    nav_html = "".join(f'<a class="{c}" href="{h}#{key}">{tx(zh,en,lang)}</a>' for key, zh, en, c in nav)
+    nav = [
+        ("about", "关于", "About"), ("news", "近况", "News"),
+        ("projects", "项目", "Projects"), ("education", "教育", "Education"),
+        ("experience", "经历", "Experience"), ("opensource", "开源", "Open source"),
+        ("recognition", "成果", "Awards"), ("contact", "联系", "Contact"),
+    ]
+    nav_html = "".join(f'<a href="{h}#{key}">{tx(zh,en,lang)}</a>' for key, zh, en in nav)
     return f'''<!doctype html>
 <html lang="{tx('zh-CN','en',lang)}">
 <head>
@@ -134,10 +139,11 @@ def shell(title, description, body, lang, filename, *, detail=False, alternate=N
 <link rel="canonical" href="{SITE}/{filename}"><link rel="icon" type="image/svg+xml" href="{prefix}assets/favicon.svg">
 <meta property="og:type" content="website"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{SITE}/{filename}"><meta property="og:image" content="{SITE}/assets/portrait.png">
 <link rel="stylesheet" href="{prefix}assets/style.css">
+<script src="{prefix}assets/navigation.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#main">{tx('跳到正文','Skip to content',lang)}</a>
-<header class="site-header"><div class="wrap header-inner"><a class="wordmark" href="{h}">{tx('张壮志','Zhuangzhi Zhang',lang)}<small>{tx('Zhuangzhi Zhang','张壮志',lang)}</small></a><nav class="nav" aria-label="{tx('主导航','Main navigation',lang)}">{nav_html}<a class="lang" href="{alternate}" lang="{tx('en','zh-CN',lang)}" hreflang="{tx('en','zh-CN',lang)}">{tx('EN','中文',lang)}</a></nav></div></header>
+<header class="site-header"><div class="wrap header-inner"><a class="wordmark" href="{h}">{tx('张壮志','Zhuangzhi Zhang',lang)}<small>{tx('Zhuangzhi Zhang','张壮志',lang)}</small></a><button class="nav-toggle" type="button" aria-controls="site-nav" aria-expanded="false">{tx('目录','Menu',lang)} <span aria-hidden="true">☰</span></button><nav class="nav" id="site-nav" aria-label="{tx('主导航','Main navigation',lang)}">{nav_html}<a class="lang" href="{alternate}" lang="{tx('en','zh-CN',lang)}" hreflang="{tx('en','zh-CN',lang)}">{tx('EN','中文',lang)}</a></nav></div></header>
 {body}
 <footer class="site-footer"><div class="wrap footer-inner"><span>© 2026 {esc(tr(PROFILE['name'],lang))}</span><span>{tx('更新于 2026 年 11 月','Updated November 2026',lang)} · <a href="{PROFILE['contact']['github']}/zsevene077-cyber.github.io">{tx('网站源码','Website source',lang)}</a></span></div></footer>
 </body></html>'''
@@ -187,25 +193,68 @@ def education(lang):
 
 
 def homepage(lang):
-    bio = ''.join(f'<p>{esc(tr(b,lang))}</p>' for b in PROFILE['bio'][:2])
-    rows=[]
-    for p in PROJECTS:
-        tags = ''.join(f'<span class="tag">{esc(t)}</span>' for t in p['tags'][:3])
-        rows.append(f'<article class="project-row">{project_art(p,lang)}<div class="project-copy"><div class="eyebrow">{esc(tr(p["category"],lang))}</div><h3><a href="{page_path(p,lang)}">{esc(tr(p["title"],lang))}</a></h3><p>{esc(tr(p["summary"],lang))}</p><p class="project-highlight">{esc(tr(p["highlight"],lang))}</p><div class="project-meta">{tags}<a class="detail" href="{page_path(p,lang)}">{tx("项目详情","Read the project",lang)}</a></div></div></article>')
+    intro = tx(
+        "我在北京理工大学读车辆工程硕士，在原力灵机做机器人模型评测、推理优化和真机数据采集。我关心怎样更快、更可靠地找出策略在哪些场景下会失败，以及这些失败能怎样指导下一轮训练。",
+        "I study vehicle engineering at Beijing Institute of Technology. At Dexmal, I evaluate robot policies, optimize inference and work on real-robot data collection. I am interested in finding where policies fail and using those failures to guide the next round of training.",
+        lang,
+    )
+    featured_ids = ("vla-evaluation", "training-regression", "robot-data")
+    by_id = {p["id"]: p for p in PROJECTS}
+    rows = []
+    for project_id in featured_ids:
+        p = by_id[project_id]
+        title = esc(tr(p["title"], lang))
+        result = esc(tr(p["highlight"], lang))
+        if project_id == "vla-evaluation":
+            result = tx("在单张 RTX 4090D 上，500 次 LIBERO-Spatial 评测耗时从 55.8 分钟降到 32.0 分钟。", "On a single RTX 4090D, 500 LIBERO-Spatial episodes took 32.0 minutes, down from 55.8.", lang)
+        rows.append(f'''<article class="project-row">{project_art(p,lang)}
+<div class="project-copy"><h3><a href="{page_path(p,lang)}">{title}</a></h3>
+<p class="project-highlight">{result}</p><p>{esc(tr(p["summary"],lang))}</p>
+<a class="detail" href="{page_path(p,lang)}">{tx("实验详情","Experiment details",lang)}</a></div></article>''')
+    other_projects = " · ".join(
+        f'<a href="{page_path(p,lang)}">{esc(tr(p["title"],lang))}</a>'
+        for p in PROJECTS if p["id"] not in featured_ids
+    )
+    research = {
+        "start": PROFILE["education"][0]["start"], "end": "present",
+        "organization": PROFILE["education"][0]["institution"],
+        "role": {"zh": "硕士研究 · 柔性线缆仿真", "en": "Master’s research · Flexible cable simulation"},
+        "description": [{"zh": "研究基于 PBD / XPBD 的柔性线缆仿真。", "en": "I study flexible cable simulation with position-based dynamics (PBD and XPBD)."}],
+    }
     patents=[]
     for p in PROFILE['recognition']:
         if p['type']=='patent':
             patents.append(f'<article class="output-item"><h3>{esc(tr(p["title"],lang))}</h3><p>{esc(tr(p["category"],lang))} · {esc(tr(p["status"],lang))}<br>{esc(p["identifier"])} · {esc(tr(p["role"],lang))}</p></article>')
     awards=''.join(f'<li><small>{esc(a["date"] or "—")}</small><span>{esc(tr(a["title"],lang))}</span></li>' for a in PROFILE['recognition'] if a['type']=='award' and a['featured'])
-    skills=''.join(f'<span>{esc(tr(s,lang))}</span>' for s in PROFILE['skills'])
-    return f'''<main id="main" class="wrap home-main">
-<section id="about" class="hero" aria-labelledby="name"><div class="hero-text"><div class="eyebrow">ROBOT LEARNING & AI SYSTEMS</div><h1 id="name">{esc(tr(PROFILE['name'],lang))}<span class="name-en">{tx('Zhuangzhi Zhang','张壮志',lang)}</span></h1><p class="hero-role">{tx('北京理工大学硕士研究生 · 原力灵机 AI Infra 实习生','M.S. student at BIT · AI Infrastructure Intern at Dexmal',lang)}</p><div class="bio">{bio}</div><div class="contact-links"><a href="mailto:{PROFILE['contact']['email']}">{tx('邮箱','Email',lang)}</a><a href="{PROFILE['contact']['github']}">GitHub</a><a href="{cv(lang)}">{tx('简历','CV',lang)}</a></div></div><figure class="portrait"><img src="assets/portrait.png" alt="{tx('张壮志的个人照片','Portrait of Zhuangzhi Zhang',lang)}" width="319" height="382"><figcaption>{tx('北京，中国','Beijing, China',lang)}<br>{tx('机器人学习与 AI 系统','Robot learning & AI systems',lang)}</figcaption></figure></section>
-<div class="focus-line"><strong>{tx('当前关注','Current interests',lang)}</strong><span>{tx('VLA 评测　/　模型部署　/　机器人数据','VLA evaluation　/　Model serving　/　Robot data',lang)}</span></div>
-<section id="projects" class="section"><div class="section-heading"><div><h2>{tx('精选项目','Selected projects',lang)}</h2><p>{tx('从实验配置到数据与结果，记录我参与的工程实践。','Engineering work connecting experiment setup, data, and results.',lang)}</p></div><a href="{CATALOG}">{tx('GitHub 项目目录','Project catalog on GitHub',lang)}</a></div>{''.join(rows)}</section>
-<section id="experience" class="section"><div class="section-heading"><h2>{tx('实习经历','Experience',lang)}</h2></div>{timeline(PROFILE['experience'],lang)}</section>
-<section class="section two-columns" id="education"><div><h2 class="subheading">{tx('教育背景','Education',lang)}</h2>{education(lang)}</div><div><h2 class="subheading">{tx('技术与实践','Tools & practice',lang)}</h2><div class="skill-list">{skills}</div><p style="font-size:16px;color:var(--muted);margin-top:23px">{esc(tr(PROFILE['bio'][2],lang))}</p></div></section>
-<section class="section" id="recognition"><div class="section-heading"><h2>{tx('成果与荣誉','Selected outputs & awards',lang)}</h2><a href="{cv(lang)}">{tx('完整简历','Full CV',lang)}</a></div><div class="outputs"><div>{''.join(patents)}<p style="font-size:15px;color:var(--muted);margin-top:13px">{tx('另有 4 项软件著作权，涵盖林业无人机管理、运动仿真与采摘装备控制。','Four software copyright registrations cover forestry UAV management, motion simulation, and harvesting-device control.',lang)}</p></div><ul class="award-list">{awards}</ul></div></section>
-<section id="contact" class="contact-section"><div><h2>{tx('保持联系','Get in touch',lang)}</h2><p>{tx('欢迎交流机器人学习、评测与 AI Infra 相关问题。','I welcome conversations about robot learning, evaluation, and AI infrastructure.',lang)}</p></div><a class="email-link" href="mailto:{PROFILE['contact']['email']}">{PROFILE['contact']['email']}</a></section>
+    return f'''<main id="main" class="academic-home">
+<section id="about" class="academic-hero" aria-labelledby="name">
+<div class="hero-landscape" role="img" aria-label="{tx('雪山下的双臂机器人工作台，窗边有小猫，窗外有人骑摩托、登山。','A two-arm robot at a mountain workbench, with a sleeping cat, a motorcyclist and a climber.',lang)}"></div>
+<div class="wrap hero-inner"><div class="hero-identity">
+<img class="hero-portrait" src="assets/portrait.png" width="319" height="382" alt="{esc(tr(PROFILE['name'],lang))}">
+<h1 id="name">{esc(tr(PROFILE['name'],lang))}<span>{tx('Zhuangzhi Zhang','张壮志',lang)}</span></h1></div>
+<p class="hero-field">{esc(tr(PROFILE['tagline'],lang))}</p>
+<p class="intro-copy">{esc(intro)}</p>
+<div class="hero-actions"><a href="{cv(lang)}">{tx('简历','CV',lang)}</a><a href="{PROFILE['contact']['github']}">GitHub</a><a href="mailto:{PROFILE['contact']['email']}">{tx('邮箱','Email',lang)}</a></div></div></section>
+<section id="news" class="profile-block tinted"><div class="wrap">
+<h2>{tx('近况','News',lang)}</h2><div class="dated-row"><time datetime="2026-11">2026.11</time><p>{tx('整理并公开机器人评测、训推回归与数据采集项目记录。','Published project notes on robot evaluation, training regression checks and data collection.',lang)} <a href="{CATALOG}">{tx('项目目录','Project index',lang)}</a></p></div>
+</div></section>
+<section id="projects" class="profile-block"><div class="wrap">
+<h2>{tx('代表项目','Selected projects',lang)}</h2>{''.join(rows)}
+<p class="related-projects">{tx('其他项目','More projects',lang)} · {other_projects}</p></div></section>
+<section id="education" class="profile-block tinted"><div class="wrap">
+<h2>{tx('教育背景','Education',lang)}</h2><div class="academic-education">{education(lang)}</div></div></section>
+<section id="experience" class="profile-block"><div class="wrap">
+<h2>{tx('研究与实习经历','Research & experience',lang)}</h2>{timeline([research, *PROFILE['experience']],lang)}</div></section>
+<section id="opensource" class="profile-block tinted"><div class="wrap">
+<h2>{tx('公开项目与技术笔记','Public projects & technical notes',lang)}</h2>
+<article class="resource-row"><div><h3><a href="{CATALOG}">Embodied AI Portfolio</a></h3><p>{tx('机器人学习项目目录，收录实验条件、性能对照和评测记录。','An index of robot learning projects, experiment settings, performance comparisons and evaluation records.',lang)}</p></div>
+<a href="{CATALOG}" aria-label="{tx('打开 GitHub 项目目录','Open the project catalog on GitHub',lang)}">GitHub ↗</a></article>
+</div></section>
+<section class="profile-block" id="recognition"><div class="wrap"><h2>{tx('成果与荣誉','Selected outputs & awards',lang)}</h2>
+<div class="outputs"><div>{''.join(patents)}<p class="copyright-note">{tx('另有 4 项软件著作权，涵盖林业无人机管理、运动仿真与采摘装备控制。','Four software copyright registrations cover forestry UAV management, motion simulation and harvesting equipment control.',lang)}</p></div><ul class="award-list">{awards}</ul></div></div></section>
+<section id="contact" class="profile-block tinted"><div class="wrap contact-strip"><div>
+<h2>{tx('联系','Contact',lang)}</h2><a href="mailto:{PROFILE['contact']['email']}">{esc(PROFILE['contact']['email'])}</a></div>
+<a href="{cv(lang)}">{tx('完整简历与技术经历','Full CV & technical experience',lang)} →</a></div></section>
 </main>'''
 
 
